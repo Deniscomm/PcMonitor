@@ -1,0 +1,9 @@
+[package]
+name = "pcmonitor-app"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+
+[dependencies]
+eframe = "0.37"
+pcmonitor-core = { path = "../pcmonitor-core" }

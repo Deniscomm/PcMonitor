@@ -1,0 +1,126 @@
+<UserControl x:Class="PcMonitor.Views.GpuTuningView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="420" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Управление -->
+        <Border Grid.Column="0" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1" CornerRadius="10" Padding="18" Margin="0,0,12,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Text="Разгон и питание видеокарты" FontSize="17" FontWeight="SemiBold" />
+                    <TextBlock x:Name="GpuNameText" Foreground="{DynamicResource TextDimBrush}" Margin="0,4,0,0" />
+                    <TextBlock Text="Управление идёт официальными средствами драйвера NVIDIA (nvidia-smi): лимит мощности и блокировка частот. Значения читаются обратно — видно, принял ли драйвер команду."
+                               Foreground="{DynamicResource TextFaintBrush}" FontSize="11" TextWrapping="Wrap"
+                               Margin="0,8,0,16" />
+
+                    <!-- Лимит мощности -->
+                    <TextBlock Text="Лимит мощности" FontWeight="SemiBold" Margin="0,4,0,4" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Slider x:Name="PowerSlider" Minimum="50" Maximum="250" TickFrequency="5"
+                                IsSnapToTickEnabled="True" ValueChanged="Power_ValueChanged" />
+                        <TextBlock x:Name="PowerValueText" Grid.Column="1" MinWidth="70" TextAlignment="Right"
+                                   VerticalAlignment="Center" FontWeight="SemiBold" />
+                    </Grid>
+                    <TextBlock x:Name="PowerRangeText" Foreground="{DynamicResource TextFaintBrush}" FontSize="11" />
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Применить лимит" Click="ApplyPower_Click" Margin="0" />
+                        <Button Grid.Column="2" Content="Вернуть заводской" Click="DefaultPower_Click" Margin="0" />
+                    </Grid>
+
+                    <!-- Частоты ядра -->
+                    <TextBlock Text="Частота ядра (блокировка)" FontWeight="SemiBold" Margin="0,18,0,4" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="от" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBox x:Name="CoreMinBox" Grid.Column="1" Padding="8,5" />
+                        <TextBlock Text="до" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,6,0" />
+                        <TextBox x:Name="CoreMaxBox" Grid.Column="3" Padding="8,5" />
+                    </Grid>
+                    <TextBlock Text="Одинаковые значения фиксируют частоту — удобно для стабильного разгона и проверки охлаждения."
+                               Foreground="{DynamicResource TextFaintBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Заблокировать частоту" Click="ApplyCore_Click" Margin="0" />
+                        <Button Grid.Column="2" Content="Снять блокировку" Click="ResetClocks_Click" Margin="0" />
+                    </Grid>
+
+                    <TextBlock Text="Пресеты разгона" FontWeight="SemiBold" Margin="0,18,0,6" />
+                    <WrapPanel>
+                        <Button Content="Тихий режим (мин. лимит)" Click="Quiet_Click" />
+                        <Button Content="Заводской" Click="DefaultPower_Click" />
+                        <Button Content="Максимум питания" Click="MaxPower_Click" />
+                        <Button Content="Стабильные 1600 МГц" Click="Lock1600_Click" />
+                    </WrapPanel>
+
+                    <TextBlock Text="Границы частот и вентиляторы" FontWeight="SemiBold" Margin="0,18,0,6" />
+                    <TextBlock x:Name="LimitsText" Foreground="{DynamicResource TextDimBrush}" FontSize="11.5"
+                               TextWrapping="Wrap" />
+                    <TextBlock x:Name="MemoryLockText" Foreground="{DynamicResource TextFaintBrush}" FontSize="11"
+                               TextWrapping="Wrap" Margin="0,6,0,0" />
+                    <Button Content="Открыть внешних приложений (если установлен)" Click="Afterburner_Click"
+                            Margin="0,10,0,0" />
+                    <TextBlock Text="Кривые вентиляторов и смещения частот NVAPI на этом драйвере отклоняет — их удобнее менять в Afterburner; здесь остаются лимит мощности и блокировка частот, которые драйвер принимает."
+                               Foreground="{DynamicResource TextFaintBrush}" FontSize="11" TextWrapping="Wrap"
+                               Margin="0,6,0,0" />
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Состояние и журнал -->
+        <Border Grid.Column="1" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1" CornerRadius="10" Padding="16">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top">
+                    <TextBlock Text="Состояние сейчас" FontSize="16" FontWeight="SemiBold" />
+                    <UniformGrid Columns="2" Margin="0,12,0,0">
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Лимит мощности" Foreground="{DynamicResource TextDimBrush}" FontSize="11" />
+                            <TextBlock x:Name="StatePowerText" Text="—" FontSize="18" FontWeight="Bold" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Температура" Foreground="{DynamicResource TextDimBrush}" FontSize="11" />
+                            <TextBlock x:Name="StateTempText" Text="—" FontSize="18" FontWeight="Bold" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Частота ядра" Foreground="{DynamicResource TextDimBrush}" FontSize="11" />
+                            <TextBlock x:Name="StateCoreText" Text="—" FontSize="18" FontWeight="Bold" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Частота памяти" Foreground="{DynamicResource TextDimBrush}" FontSize="11" />
+                            <TextBlock x:Name="StateMemoryText" Text="—" FontSize="18" FontWeight="Bold" />
+                        </StackPanel>
+                    </UniformGrid>
+
+                    <TextBlock Text="Журнал действий" FontWeight="SemiBold" Margin="0,6,0,6" />
+                </StackPanel>
+                <TextBox x:Name="LogBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto" Background="{DynamicResource InputBg}"
+                         FontFamily="Consolas" FontSize="11.5" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>
+

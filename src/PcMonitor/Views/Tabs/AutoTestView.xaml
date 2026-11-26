@@ -1,0 +1,263 @@
+<UserControl x:Class="PcMonitor.Views.AutoTestView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Foreground="{DynamicResource TextBrush}" FontFamily="Segoe UI" FontSize="12">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="360" />
+            <ColumnDefinition Width="12" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Настройки запуска -->
+        <Border Grid.Column="0" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1" CornerRadius="10" Padding="14">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="Авто-тест всего компьютера" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" Foreground="{DynamicResource TextDimBrush}"
+                           Margin="0,6,0,10"
+                           Text="Проверяет комплектующие под максимальной нагрузкой: температуры, мощности, частоты, стабильность, ошибки и состояние дисков. В конце — понятный отчёт с выводами." />
+
+                <Button DockPanel.Dock="Top" Content="Запустить авто-тест" Click="Run_Click" Margin="0,0,0,6"
+                        Padding="14,8" />
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                    <Button Content="Стоп" Click="Stop_Click" Margin="0" />
+                    <Button Content="Открыть последний отчёт" Click="OpenReport_Click" />
+                    <Button Content="История" Click="History_Click" />
+                </StackPanel>
+
+                <ProgressBar x:Name="Progress" DockPanel.Dock="Top" Height="8" Minimum="0" Maximum="1"
+                             Margin="0,12,0,0" />
+                <TextBlock x:Name="PhaseText" DockPanel.Dock="Top" Foreground="{DynamicResource TextDimBrush}"
+                           Margin="0,6,0,0" TextWrapping="Wrap" Text="готов к запуску" />
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,14,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Что проверяем" FontWeight="SemiBold" Margin="0,0,0,6" />
+                        <ItemsControl x:Name="ComponentList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding Title}" IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                              ToolTip="{Binding Hint}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBlock Text="Параметры" FontWeight="SemiBold" Margin="0,14,0,6" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Длительность фазы" VerticalAlignment="Center" />
+                            <ComboBox x:Name="DurationBox" Grid.Column="1" SelectedIndex="1">
+                                <ComboBoxItem Content="15 секунд (быстро)" Tag="15" />
+                                <ComboBoxItem Content="30 секунд" Tag="30" />
+                                <ComboBoxItem Content="60 секунд" Tag="60" />
+                                <ComboBoxItem Content="120 секунд (полно)" Tag="120" />
+                                <ComboBoxItem Content="Своя длительность ниже" Tag="0" />
+                            </ComboBox>
+                        </Grid>
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Своя фаза, секунд (5–3600)" VerticalAlignment="Center" />
+                            <TextBox x:Name="PhaseSecondsBox" Grid.Column="1" Padding="8,5" />
+                        </Grid>
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Покой, секунд (5–3600)" VerticalAlignment="Center" />
+                            <TextBox x:Name="IdleSecondsBox" Grid.Column="1" Padding="8,5" />
+                        </Grid>
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Память для тестов, МБ" VerticalAlignment="Center" />
+                            <TextBox x:Name="MemoryBox" Grid.Column="1" Padding="8,5" />
+                        </Grid>
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Файл теста диска, МБ" VerticalAlignment="Center" />
+                            <TextBox x:Name="DiskBox" Grid.Column="1" Padding="8,5" />
+                        </Grid>
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Секунд на шаблон памяти" VerticalAlignment="Center" />
+                            <TextBox x:Name="MemorySecondsBox" Grid.Column="1" Padding="8,5" />
+                        </Grid>
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Пресет GPU-теста" VerticalAlignment="Center" />
+                            <ComboBox x:Name="PresetBox" Grid.Column="1" SelectedIndex="2">
+                                <ComboBoxItem Content="Low" />
+                                <ComboBoxItem Content="Medium" />
+                                <ComboBoxItem Content="High" />
+                                <ComboBoxItem Content="Extreme" />
+                            </ComboBox>
+                        </Grid>
+                        <CheckBox x:Name="CombinedCheck" Content="Добавлять совмещённую нагрузку (CPU + GPU)"
+                                  IsChecked="True" Margin="0,10,0,0" />
+
+                        <TextBlock Text="Какие накопители проверять" FontWeight="SemiBold" Margin="0,14,0,6" />
+                        <TextBlock Text="Выберите диски и при необходимости исправьте автоопределение типа. USB-флешки проверяются только при отдельном включении."
+                                   Foreground="{DynamicResource TextFaintBrush}" FontSize="11" TextWrapping="Wrap"
+                                   Margin="0,0,0,4" />
+                        <ItemsControl x:Name="DiskList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="112" />
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Content="{Binding Title}" IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                  ToolTip="{Binding Hint}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                        <ComboBox Grid.Column="1" ItemsSource="{Binding Choices}"
+                                                  DisplayMemberPath="Label" SelectedValuePath="Value"
+                                                  SelectedValue="{Binding Kind, Mode=TwoWay}"
+                                                  SelectionChanged="DiskKind_Changed"
+                                                  ToolTip="Ручная классификация накопителя; «Авто» использует данные шины и модели." />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Grid />
+            </DockPanel>
+        </Border>
+
+        <!-- Результаты -->
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="10" Padding="16">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Left">
+                        <TextBlock Text="Оценка" Foreground="{DynamicResource TextDimBrush}" FontSize="11" />
+                        <TextBlock x:Name="ScoreText" Text="—" FontSize="34" FontWeight="Bold"
+                                   Foreground="{DynamicResource AccentBrush}" />
+                    </StackPanel>
+                    <StackPanel Margin="24,0,0,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="SummaryText" TextWrapping="Wrap"
+                                   Text="Запустите авто-тест — здесь появится вывод по компьютеру." />
+                        <TextBlock x:Name="CountsText" Foreground="{DynamicResource TextDimBrush}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <Grid Grid.Row="1" Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="380" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1" CornerRadius="10" Padding="14">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Выводы по комплектующим" FontWeight="SemiBold"
+                                   Margin="0,0,0,8" />
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="VerdictList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{DynamicResource PanelAltBg}" CornerRadius="8"
+                                                Padding="12,10" Margin="0,0,0,8">
+                                            <StackPanel>
+                                                <DockPanel>
+                                                    <Border DockPanel.Dock="Left" CornerRadius="9" Padding="8,2"
+                                                            Background="{Binding BadgeBrush}">
+                                                        <TextBlock Text="{Binding LevelText}" FontSize="11"
+                                                                   Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" />
+                                                    </Border>
+                                                    <TextBlock Text="{Binding Component}" Margin="8,0,0,0"
+                                                               FontWeight="SemiBold" VerticalAlignment="Center" />
+                                                </DockPanel>
+                                                <TextBlock Text="{Binding Title}" Margin="0,6,0,0" TextWrapping="Wrap" />
+                                                <TextBlock Text="{Binding Detail}" Margin="0,4,0,0" TextWrapping="Wrap"
+                                                           Foreground="{DynamicResource TextDimBrush}" />
+                                                <TextBlock Text="{Binding Recommendation}" Margin="0,4,0,0"
+                                                           TextWrapping="Wrap" Foreground="{DynamicResource TextFaintBrush}"
+                                                           FontStyle="Italic" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Border>
+
+                <Border Grid.Column="2" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1" CornerRadius="10" Padding="14">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Замеры по фазам" FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="PhaseList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,0,0,12">
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Subtitle}" Foreground="{DynamicResource TextDimBrush}"
+                                                       FontSize="11" TextWrapping="Wrap" />
+                                            <ItemsControl ItemsSource="{Binding Metrics}" Margin="0,6,0,0">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <DockPanel Margin="0,1">
+                                                            <TextBlock Text="{Binding Value}" DockPanel.Dock="Right"
+                                                                       Foreground="{DynamicResource TextBrush}" />
+                                                            <TextBlock Text="{Binding Name}"
+                                                                       Foreground="{DynamicResource TextDimBrush}"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                        </DockPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Border>
+            </Grid>
+
+            <Border Grid.Row="2" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="10" Padding="14" Margin="0,12,0,0" Height="170">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Журнал" FontWeight="SemiBold" Margin="0,0,0,6" />
+                    <ScrollViewer x:Name="LogScroll" VerticalScrollBarVisibility="Auto">
+                        <TextBox x:Name="LogBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                                 BorderThickness="0" Background="Transparent"
+                                 Foreground="{DynamicResource TextDimBrush}" FontFamily="Consolas" FontSize="11" />
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
+

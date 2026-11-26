@@ -1,0 +1,111 @@
+<Window x:Class="PcMonitor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:PcMonitor.Views"
+        Title="PC Monitor"
+        Height="900" Width="1480" MinHeight="640" MinWidth="1120"
+        WindowStartupLocation="CenterScreen" Loaded="MainWindow_Loaded" ContentRendered="MainWindow_ContentRendered" PreviewKeyDown="MainWindow_PreviewKeyDown"
+        Background="{DynamicResource WindowBg}" Foreground="{DynamicResource TextBrush}"
+        FontFamily="Segoe UI" FontSize="12" TextOptions.TextFormattingMode="Display" UseLayoutRounding="True">
+    <Grid x:Name="RootLayout">
+      <DockPanel>
+        <Border DockPanel.Dock="Top" Background="{DynamicResource ChromeBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="20,12">
+            <StackPanel>
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <ToggleButton x:Name="PauseButton" Style="{StaticResource PillToggle}" Foreground="{DynamicResource TextBrush}" Content="Пауза" Click="Pause_Click"/>
+                        <Button Foreground="{DynamicResource TextBrush}" Content="Экспорт" Click="Export_Click" ToolTip="Экспортировать показания в CSV"/>
+                        <ToggleButton x:Name="OsdButton" Style="{StaticResource PillToggle}" Foreground="{DynamicResource TextBrush}" Content="OSD" Click="ToggleOsd_Click" ToolTip="Экранный оверлей (Ctrl+Alt+O)"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,18,0">
+                            <Button x:Name="EasyModeButton" Foreground="{DynamicResource TextBrush}" Content="Лёгкий режим" ToolTip="Лёгкий режим — для быстрой проверки. Профи — для детальной диагностики" Click="EasyMode_Click" Margin="0" />
+                            <Button x:Name="ProModeButton" Foreground="{DynamicResource TextBrush}" Content="Профи" ToolTip="Лёгкий режим — для быстрой проверки. Профи — для детальной диагностики" Click="ProMode_Click" Margin="6,0,0,0" />
+                        </StackPanel>
+                        <TextBlock Text="PC Monitor" Foreground="{DynamicResource TextBrush}" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <Border x:Name="AdminBadge" Margin="14,0,0,0" VerticalAlignment="Center" ToolTip="Мониторинг запущен с правами администратора">
+                            <TextBlock Text="Администратор" FontSize="11" Foreground="{DynamicResource TextFaintBrush}"/>
+                        </Border>
+                        <Border x:Name="ElevationBadge" Margin="14,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" ToolTip="Без прав администратора часть аппаратных датчиков недоступна">
+                            <TextBlock Text="Ограниченный доступ" FontSize="11" Foreground="{DynamicResource WarnBrush}"/>
+                        </Border>
+                    </StackPanel>
+                </DockPanel>
+                <ToggleButton x:Name="ToolsToggle" Content="Дополнительные инструменты" Style="{StaticResource FlyoutToggle}"
+                              Margin="0,8,0,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                              Click="ToolsToggle_Click" />
+                <Border x:Name="ToolsFlyout" Visibility="Collapsed" Opacity="0" Margin="0,6,0,0"
+                        Padding="8,7" Background="{DynamicResource PanelBg}"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8"
+                        RenderTransformOrigin="0.5,0" RenderTransform="{StaticResource FlyoutTransform}">
+                    <WrapPanel>
+                        <Button Content="Сброс мин/макс" Click="ResetMinMax_Click"/>
+                        <ToggleButton x:Name="LogButton" Style="{StaticResource PillToggle}" Content="Запись CSV" Click="Log_Click"/>
+                        <Button Content="Журналы" Click="OpenLogs_Click"/>
+                        <ToggleButton x:Name="TopMostButton" Style="{StaticResource PillToggle}" Content="Поверх окон" Click="TopMost_Click"/>
+                        <Button Content="Перезапуск с правами" Click="RestartElevated_Click"/>
+                    </WrapPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource ChromeBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="20,7">
+            <DockPanel>
+                <Button x:Name="SafetyInfoButton" DockPanel.Dock="Right" Content="Безопасность" Margin="8,0,0,0"
+                        Padding="10,4" Click="SafetyInfoButton_Click" Visibility="Collapsed" />
+                <TextBlock x:Name="StatusRight" DockPanel.Dock="Right" Foreground="{DynamicResource GoodBrush}" FontSize="11" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                <TextBlock x:Name="StatusLeft" Foreground="{DynamicResource GoodBrush}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+            </DockPanel>
+        </Border>
+        <Border DockPanel.Dock="Left" Width="190" Margin="14,14,0,16" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="10">
+            <DockPanel>
+                <Button x:Name="ConsentButton" DockPanel.Dock="Bottom" Content="Соглашение" Margin="0,12,0,0"
+                        Click="ConsentButton_Click" HorizontalContentAlignment="Left" Visibility="Collapsed" />
+                <StackPanel>
+                    <TextBlock Text="PC Monitor" FontSize="15" FontWeight="SemiBold" Margin="10,8,10,14" Foreground="{DynamicResource AccentBrush}" />
+                    <Button Style="{StaticResource SidebarButton}" x:Name="SidebarOverview" Content="Обзор" Tag="0" Click="Sidebar_Click" HorizontalContentAlignment="Left" />
+                    <Button Style="{StaticResource SidebarButton}" x:Name="SidebarSensors" Content="Датчики" Tag="1" Click="Sidebar_Click" HorizontalContentAlignment="Left" />
+                    <Button Style="{StaticResource SidebarButton}" x:Name="SidebarSystem" Content="Система" Tag="2" Click="Sidebar_Click" HorizontalContentAlignment="Left" />
+                    <Button Style="{StaticResource SidebarButton}" x:Name="SidebarAutoTest" Content="Авто-тест" Tag="3" Click="Sidebar_Click" HorizontalContentAlignment="Left" />
+                    <Button Style="{StaticResource SidebarButton}" x:Name="SidebarStress" Content="Нагрузка" Tag="4" Click="Sidebar_Click" HorizontalContentAlignment="Left" />
+                    <Button Style="{StaticResource SidebarButton}" x:Name="SidebarRenders" Content="Рендеры" Tag="5" Click="Sidebar_Click" HorizontalContentAlignment="Left" />
+                    <Button Style="{StaticResource SidebarButton}" x:Name="SidebarSettings" Content="Настройки" Tag="6" Click="Sidebar_Click" HorizontalContentAlignment="Left" />
+                    <Button Style="{StaticResource SidebarButton}" x:Name="SidebarAbout" Content="О приложении" Tag="7" Click="Sidebar_Click" HorizontalContentAlignment="Left" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+        <TabControl x:Name="Tabs" Margin="14,14,20,16" SelectionChanged="Tabs_SelectionChanged">
+            <TabControl.Template>
+                <ControlTemplate TargetType="TabControl">
+                    <ContentPresenter ContentSource="SelectedContent" />
+                </ControlTemplate>
+            </TabControl.Template>
+            <TabItem x:Name="OverviewTab" Header="Обзор"><views:OverviewView x:Name="Overview"/></TabItem>
+            <TabItem x:Name="SensorsTab" Header="Датчики"><views:SensorsView x:Name="Sensors"/></TabItem>
+            <TabItem x:Name="SystemTab" Header="Система"><views:SystemOverviewView x:Name="SystemOverview"/></TabItem>
+            <TabItem x:Name="AutoTestTab" Header="Авто-тест"><views:AutoTestView x:Name="AutoTest"/></TabItem>
+            <TabItem x:Name="StressTab" Header="Нагрузка"><views:StressView x:Name="Stress"/></TabItem>
+            <TabItem x:Name="RendersTab" Header="Рендеры"><views:RendersView x:Name="Renders"/></TabItem>
+            <TabItem x:Name="SettingsTab" Header="Настройки"><views:SettingsView x:Name="SettingsPane"/></TabItem>
+            <TabItem x:Name="AboutTab" Header="О приложении"><views:AboutView x:Name="AboutPane"/></TabItem>
+        </TabControl>
+        </DockPanel>
+        <Border x:Name="LocalizationOverlay" Panel.ZIndex="100" Visibility="Collapsed"
+                Background="#66000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center" Background="{DynamicResource PanelBg}" Margin="20" Padding="24">
+              <StackPanel>
+                <ProgressBar Width="180" Height="8" IsIndeterminate="True" />
+                <TextBlock Text="Применение языка…" HorizontalAlignment="Center" Margin="0,12,0,0" />
+              </StackPanel>
+            </Border>
+        </Border>
+        <Border x:Name="ErrorToast" Panel.ZIndex="110" Visibility="Collapsed"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="20,20,20,58"
+                Background="{DynamicResource BadBrush}" CornerRadius="8" Padding="18,12"
+                >
+            <TextBlock x:Name="ErrorToastText" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold"
+                       TextWrapping="Wrap" MaxWidth="420" />
+        </Border>
+    </Grid>
+    </Window>
+
+

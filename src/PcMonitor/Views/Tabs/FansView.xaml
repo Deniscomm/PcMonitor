@@ -1,0 +1,115 @@
+<UserControl x:Class="PcMonitor.Views.FansView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Foreground="{DynamicResource TextBrush}">
+    <UserControl.Resources>
+        <Style x:Key="FanLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/><Setter Property="Foreground" Value="{DynamicResource TextDimBrush}"/>
+            <Setter Property="Margin" Value="0,8,0,4"/>
+        </Style>
+        <Style x:Key="FanNumber" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Padding" Value="7,4"/><Setter Property="Margin" Value="0,0,8,0"/>
+        </Style>
+    </UserControl.Resources>
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Все 100 %" Click="All100_Click"/>
+                    <Button Content="Вернуть BIOS" Click="AllAuto_Click"/>
+                    <Button Content="Обновить" Click="Refresh_Click"/>
+                </StackPanel>
+                <TextBlock Text="Вентиляторы" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            </DockPanel>
+            <TextBlock x:Name="SummaryText" FontSize="12" Foreground="{DynamicResource TextDimBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+            <TextBlock Text="Профили сохраняются, но после запуска включаются вручную. При потере температуры — 100 %, при выходе — BIOS. PWM не равен измеренному RPM."
+                       FontSize="11" Foreground="{DynamicResource TextFaintBrush}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+        </StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl x:Name="FanList">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Width="355" Padding="16" Margin="0,0,12,12" CornerRadius="6" VerticalAlignment="Top"
+                                Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel>
+                                <TextBox Text="{Binding Name, UpdateSourceTrigger=LostFocus}" FontSize="15" FontWeight="SemiBold" Background="Transparent" BorderThickness="0" Padding="0,2"/>
+                                <TextBlock Text="{Binding Hardware}" FontSize="10" Foreground="{DynamicResource TextFaintBrush}" TextTrimming="CharacterEllipsis" Margin="0,2,0,10"/>
+                                <DockPanel>
+                                    <TextBlock Text="{Binding ActualText}" DockPanel.Dock="Right" HorizontalAlignment="Right" FontSize="14" Foreground="{DynamicResource TextDimBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding RpmText}" FontSize="22" FontWeight="SemiBold"/>
+                                </DockPanel>
+                                <Grid Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <ComboBox ItemsSource="{Binding Modes}" SelectedItem="{Binding Mode, Mode=TwoWay}" MinWidth="150"/>
+                                    <CheckBox Grid.Column="1" Content="Включён" IsChecked="{Binding Enabled, Mode=TwoWay}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                </Grid>
+                                <StackPanel Visibility="{Binding ManualVisibility}" Margin="0,12,0,0">
+                                    <DockPanel><TextBlock Text="Скорость · меняется сразу" FontSize="11" Foreground="{DynamicResource TextDimBrush}"/>
+                                        <TextBlock Text="{Binding PercentText}" DockPanel.Dock="Right" HorizontalAlignment="Right" FontWeight="SemiBold"/></DockPanel>
+                                    <Slider Minimum="0" Maximum="100" Value="{Binding SliderValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0,8,0,0"/>
+                                </StackPanel>
+                                <StackPanel Visibility="{Binding CurveVisibility}">
+                                    <TextBlock Text="Источник температуры" Style="{StaticResource FanLabel}"/>
+                                    <ComboBox ItemsSource="{Binding Temperatures}" DisplayMemberPath="Display" SelectedValuePath="Id" SelectedValue="{Binding SensorId, Mode=TwoWay}"/>
+                                    <StackPanel Visibility="{Binding MixVisibility}">
+                                        <TextBlock Text="Второй источник и смешивание" Style="{StaticResource FanLabel}"/>
+                                        <ComboBox ItemsSource="{Binding Temperatures}" DisplayMemberPath="Display" SelectedValuePath="Id" SelectedValue="{Binding SecondSensorId, Mode=TwoWay}"/>
+                                        <ComboBox ItemsSource="{Binding MixFunctions}" SelectedItem="{Binding MixFunction, Mode=TwoWay}" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                    <Border Background="{DynamicResource InputBg}" CornerRadius="4" Padding="10" Margin="0,10,0,0">
+                                        <StackPanel>
+                                            <Canvas Width="290" Height="80" ClipToBounds="True">
+                                                <Line X1="0" Y1="80" X2="290" Y2="80" Stroke="{DynamicResource BorderBrush}"/>
+                                                <Line X1="0" Y1="40" X2="290" Y2="40" Stroke="{DynamicResource BorderBrush}"/>
+                                                <Polyline Points="{Binding CurvePreview}" Stroke="{DynamicResource AccentBrush}" StrokeThickness="2"/>
+                                            </Canvas>
+                                            <TextBlock Text="0–110 °C → 0–100 % PWM" FontSize="10" Foreground="{DynamicResource TextFaintBrush}" Margin="0,5,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <StackPanel Visibility="{Binding GraphVisibility}">
+                                        <TextBlock Text="Точки: температура:процент; …" Style="{StaticResource FanLabel}"/>
+                                        <TextBox Text="{Binding Points, UpdateSourceTrigger=LostFocus}" Padding="7,5" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <Grid Visibility="{Binding LinearVisibility}">
+                                        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                        <StackPanel><TextBlock Text="Нижняя температура, °C" Style="{StaticResource FanLabel}"/><TextBox Style="{StaticResource FanNumber}" Text="{Binding LowTemperature}"/></StackPanel>
+                                        <StackPanel Grid.Column="1"><TextBlock Text="Верхняя температура, °C" Style="{StaticResource FanLabel}"/><TextBox Style="{StaticResource FanNumber}" Text="{Binding HighTemperature}"/></StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                                <Expander Header="Настройки и датчик RPM" Margin="0,12,0,0" FontSize="12">
+                                    <StackPanel Margin="0,4,0,0">
+                                        <TextBlock Text="Измерение оборотов" Style="{StaticResource FanLabel}"/>
+                                        <ComboBox ItemsSource="{Binding Rpms}" DisplayMemberPath="Display" SelectedValuePath="Id" SelectedValue="{Binding RpmSensorId, Mode=TwoWay}"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                            <StackPanel><TextBlock Text="Минимум, %" Style="{StaticResource FanLabel}"/><TextBox Text="{Binding MinimumPercent}" Style="{StaticResource FanNumber}"/></StackPanel>
+                                            <StackPanel Grid.Column="1"><TextBlock Text="Максимум, %" Style="{StaticResource FanLabel}"/><TextBox Text="{Binding MaximumPercent}" Style="{StaticResource FanNumber}"/></StackPanel>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                            <StackPanel><TextBlock Text="Нарастание, %/с" Style="{StaticResource FanLabel}"/><TextBox Text="{Binding StepUpPerSecond}" Style="{StaticResource FanNumber}"/></StackPanel>
+                                            <StackPanel Grid.Column="1"><TextBlock Text="Снижение, %/с" Style="{StaticResource FanLabel}"/><TextBox Text="{Binding StepDownPerSecond}" Style="{StaticResource FanNumber}"/></StackPanel>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                            <StackPanel><TextBlock Text="Гистерезис, °C" Style="{StaticResource FanLabel}"/><TextBox Text="{Binding Hysteresis}" Style="{StaticResource FanNumber}"/></StackPanel>
+                                            <StackPanel Grid.Column="1"><TextBlock Text="Задержка снижения, с" Style="{StaticResource FanLabel}"/><TextBox Text="{Binding DownDelaySeconds}" Style="{StaticResource FanNumber}"/></StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="Защита: полный PWM при температуре, °C" Style="{StaticResource FanLabel}"/>
+                                        <TextBox Text="{Binding CriticalTemperature}" Style="{StaticResource FanNumber}"/>
+                                        <CheckBox Content="Разрешить остановку (0 RPM)" IsChecked="{Binding AllowStop, Mode=TwoWay}" Margin="0,10,0,0"
+                                                  ToolTip="Только если вентилятор поддерживает остановку. Не включайте для помп. Без этой опции минимум 20 % PWM; проверьте фактический RPM."/>
+                                    </StackPanel>
+                                </Expander>
+                                <TextBlock Text="{Binding Status}" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource TextDimBrush}" Margin="0,12,0,0"/>
+                                <Button Content="BIOS / авто" Click="Auto_Click" HorizontalAlignment="Right" Margin="0,10,0,0" Padding="10,4"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>
+

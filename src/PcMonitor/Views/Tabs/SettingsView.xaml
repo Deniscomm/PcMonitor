@@ -1,0 +1,279 @@
+<UserControl x:Class="PcMonitor.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Foreground="{DynamicResource TextBrush}" FontFamily="Segoe UI" FontSize="12">
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Margin="0,0,0,10">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <Button Content="Сохранить настройки" Click="Save_Click" Margin="0" />
+                    <Button Content="Открыть папку данных" Click="OpenData_Click" />
+                    <Button Content="Открыть журналы" Click="OpenLogs_Click" />
+                </StackPanel>
+                <TextBlock x:Name="StatusText" DockPanel.Dock="Right" HorizontalAlignment="Right"
+                           VerticalAlignment="Center" Foreground="{DynamicResource TextDimBrush}" />
+                <Grid />
+            </DockPanel>
+        </Border>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel MaxWidth="1100" HorizontalAlignment="Left">
+
+                <Border Style="{StaticResource SettingsCard}">
+                    <StackPanel>
+                        <TextBlock Text="Интерфейс" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Text="Изменения применяются сразу после сохранения и сохраняются в portable-папке data." Style="{StaticResource SettingsHint}" />
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="240" /><ColumnDefinition Width="260" /><ColumnDefinition Width="24" /><ColumnDefinition Width="240" /><ColumnDefinition Width="260" /></Grid.ColumnDefinitions>
+                            <TextBlock Text="Язык" VerticalAlignment="Center" />
+                            <ComboBox x:Name="LanguageBox" Grid.Column="1" Padding="8,5">
+                                <ComboBoxItem Content="Русский" Tag="ru" />
+                                <ComboBoxItem Content="English (US)" Tag="en-US" />
+                                <ComboBoxItem Content="English (UK)" Tag="en-GB" />
+                                <ComboBoxItem Content="中文 (简体)" Tag="zh-CN" />
+                            </ComboBox>
+                            <TextBlock Grid.Column="3" Text="Тема" VerticalAlignment="Center" />
+                            <ComboBox x:Name="ThemeBox" Grid.Column="4" Padding="8,5">
+                                <ComboBoxItem Content="Тёмная" Tag="Dark" />
+                                <ComboBoxItem Content="Серая" Tag="Gray" />
+                                <ComboBoxItem Content="Светлая" Tag="Light" />
+                            </ComboBox>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCard}">
+                    <StackPanel>
+                        <TextBlock Text="Опрос датчиков" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Text="Интервал между опросами. Меньше интервал — больше нагрузка на систему."
+                                   Style="{StaticResource SettingsHint}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <RadioButton x:Name="Interval05" Style="{StaticResource PillRadio}" GroupName="Interval"
+                                         Content="0,5 с" Tag="500" />
+                            <RadioButton x:Name="Interval1" Style="{StaticResource PillRadio}" GroupName="Interval"
+                                         Content="1 с" Tag="1000" />
+                            <RadioButton x:Name="Interval2" Style="{StaticResource PillRadio}" GroupName="Interval"
+                                         Content="2 с" Tag="2000" />
+                            <RadioButton x:Name="Interval5" Style="{StaticResource PillRadio}" GroupName="Interval"
+                                         Content="5 с" Tag="5000" />
+                            <RadioButton x:Name="Interval10" Style="{StaticResource PillRadio}" GroupName="Interval"
+                                         Content="10 с" Tag="10000" />
+                        </StackPanel>
+
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="240" />
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="240" />
+                                <ColumnDefinition Width="120" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Окно истории графика, точек" VerticalAlignment="Center" />
+                            <TextBox x:Name="HistoryBox" Grid.Column="1" Padding="8,5" />
+                            <TextBlock Grid.Column="3" Text="Максимальная достоверная температура, °C" VerticalAlignment="Center"
+                                       TextWrapping="Wrap" />
+                            <TextBox x:Name="PlausibleBox" Grid.Column="4" Padding="8,5" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCard}">
+                    <StackPanel>
+                        <TextBlock Text="Пороги температур по категориям" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Text="Пороги используются для подсветки, метки «перегрев» и звукового сигнала."
+                                   Style="{StaticResource SettingsHint}" />
+                        <Grid Margin="0,8,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220" />
+                                <ColumnDefinition Width="110" />
+                                <ColumnDefinition Width="110" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Категория" Foreground="{DynamicResource TextDimBrush}" />
+                            <TextBlock Grid.Column="1" Text="Предупреждение" Foreground="{DynamicResource TextDimBrush}" />
+                            <TextBlock Grid.Column="2" Text="Критично" Foreground="{DynamicResource TextDimBrush}" />
+                        </Grid>
+                        <ItemsControl x:Name="ThresholdList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="220" />
+                                            <ColumnDefinition Width="110" />
+                                            <ColumnDefinition Width="110" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Group}" VerticalAlignment="Center" />
+                                        <TextBox Grid.Column="1" Margin="0,0,8,0" Padding="8,4"
+                                                 Text="{Binding Warning, UpdateSourceTrigger=LostFocus}" />
+                                        <TextBox Grid.Column="2" Padding="8,4"
+                                                 Text="{Binding Critical, UpdateSourceTrigger=LostFocus}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCard}">
+                    <StackPanel>
+                        <TextBlock Text="Отображение и поведение" Style="{StaticResource SettingsTitle}" />
+                        <CheckBox x:Name="HideThresholdsCheck" Content="Скрывать датчики-пороги (например, «Critical Temperature» накопителя)" />
+                        <CheckBox x:Name="HideImplausibleCheck" Content="Скрывать недостоверные значения неподключённых датчиков" />
+                        <CheckBox x:Name="OnlyWithValuesCheck" Content="Показывать только датчики со значениями" />
+                        <CheckBox x:Name="AlarmSoundCheck" Content="Звуковой сигнал при превышении критического порога" />
+                        <CheckBox x:Name="TopMostCheck" Content="Окно поверх остальных" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCard}">
+                    <StackPanel>
+                        <TextBlock Text="Автозапуск" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Text="Запуск приложения при входе в Windows." Style="{StaticResource SettingsHint}" />
+                        <CheckBox x:Name="StartupCheck" Content="Запускать при входе в Windows" />
+                        <Button Content="Проверить автозапуск" Click="StartupCheck_Click" Margin="0,8,0,0" />
+                        <TextBlock x:Name="TrayStatusText" Foreground="{DynamicResource TextDimBrush}" FontSize="11"
+                                   TextWrapping="Wrap" Margin="0,8,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCard}">
+                    <StackPanel>
+                        <TextBlock Text="Активность в Discord" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Text="Чтобы Discord показывал PcMonitor, создай приложение в Discord Developer Portal и укажи его Application ID."
+                                   Style="{StaticResource SettingsHint}" TextWrapping="Wrap" />
+                        <CheckBox x:Name="DiscordPresenceCheck" Content="Показывать активность PcMonitor в Discord" />
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="240" />
+                                <ColumnDefinition Width="360" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="ID приложения Discord (Application ID)" VerticalAlignment="Center"
+                                       TextWrapping="Wrap" />
+                            <TextBox x:Name="DiscordApplicationIdBox" Grid.Column="1" Padding="8,5" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCard}">
+                    <StackPanel>
+                        <TextBlock Text="Папки с данными (приложение переносимое)" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Text="Папку с программой можно перенести на любой диск — настройки, журналы и отчёты переедут вместе с ней. Данные можно держать отдельно: выбранный путь сохраняется в файле datapath.txt рядом с программой, а ключ --data &lt;папка&gt; задаёт его разово."
+                                   Style="{StaticResource SettingsHint}" />
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="240" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Папка данных" VerticalAlignment="Center" />
+                            <TextBox x:Name="DataPathBox" Grid.Column="1" IsReadOnly="True" Padding="8,5" />
+                        </Grid>
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="240" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Своя папка журналов (пусто — по умолчанию)" VerticalAlignment="Center"
+                                       TextWrapping="Wrap" />
+                            <TextBox x:Name="LogPathBox" Grid.Column="1" Padding="8,5" />
+                        </Grid>
+                        <TextBlock x:Name="FoldersText" Foreground="{DynamicResource TextDimBrush}" FontSize="11"
+                                   TextWrapping="Wrap" Margin="0,10,0,0" />
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button Content="Изменить папку данных…" Click="ChangeData_Click" Margin="0" />
+                            <Button Content="Открыть данные" Click="OpenData_Click" />
+                            <Button Content="Открыть журналы" Click="OpenLogs_Click" />
+                            <Button Content="Открыть отчёты" Click="OpenReports_Click" />
+                            <Button Content="Открыть историю" Click="OpenHistory_Click" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCard}">
+                    <StackPanel>
+                        <TextBlock Text="Стресс-тесты и бенчмарки" Style="{StaticResource SettingsTitle}" />
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="240" />
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="240" />
+                                <ColumnDefinition Width="120" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Память для тестов, МБ" VerticalAlignment="Center" />
+                            <TextBox x:Name="StressMemoryBox" Grid.Column="1" Padding="8,5" />
+                            <TextBlock Grid.Column="3" Text="Файл теста диска, МБ" VerticalAlignment="Center" />
+                            <TextBox x:Name="StressDiskBox" Grid.Column="4" Padding="8,5" />
+                        </Grid>
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="240" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Папка для тестов диска (пусто — временная)" VerticalAlignment="Center"
+                                       TextWrapping="Wrap" />
+                            <TextBox x:Name="StressPathBox" Grid.Column="1" Padding="8,5" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCard}">
+                    <StackPanel>
+                        <TextBlock Text="Экранный оверлей (внешних приложений-стиль)" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Text="Окно поверх всех приложений, сквозное для кликов. Включение — кнопка OSD на панели или Ctrl+Alt+O."
+                                   Style="{StaticResource SettingsHint}" />
+                        <CheckBox x:Name="OsdEnabledCheck" Content="Показывать оверлей"
+                                  Checked="OsdEnabledCheck_Changed" Unchecked="OsdEnabledCheck_Changed" />
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="160" />
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="160" />
+                                <ColumnDefinition Width="110" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Положение" VerticalAlignment="Center" />
+                            <ComboBox x:Name="OsdCornerBox" Grid.Column="1" Margin="0,0,0,0">
+                                <ComboBoxItem Content="Слева сверху" Tag="LeftTop" />
+                                <ComboBoxItem Content="Справа сверху" Tag="RightTop" />
+                                <ComboBoxItem Content="Слева снизу" Tag="LeftBottom" />
+                                <ComboBoxItem Content="Справа снизу" Tag="RightBottom" />
+                            </ComboBox>
+                            <TextBlock Grid.Column="3" Text="Отступ по X / Y" VerticalAlignment="Center" />
+                            <TextBox x:Name="OsdOffsetBox" Grid.Column="4" Padding="8,5" />
+                            <TextBlock Grid.Column="6" Text="Прозрачность / кегль" VerticalAlignment="Center" />
+                            <TextBox x:Name="OsdStyleBox" Grid.Column="7" Padding="8,5" />
+                        </Grid>
+                        <TextBlock Text="Метрики в оверлее" Foreground="{DynamicResource TextDimBrush}" Margin="0,12,0,4" />
+                        <ItemsControl x:Name="OsdMetricList">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding Title}" IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                              Width="260" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SettingsCard}">
+                    <StackPanel>
+                        <TextBlock Text="Правила для отдельных датчиков" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock x:Name="RulesInfo" Style="{StaticResource SettingsHint}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <Button Content="Сбросить все правила" Click="ResetRules_Click" Margin="0" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>
+

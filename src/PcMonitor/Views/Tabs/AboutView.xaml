@@ -1,0 +1,35 @@
+<UserControl x:Class="PcMonitor.Views.AboutView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Border Background="{DynamicResource PanelBg}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="24"
+                Margin="0,0,4,0">
+            <StackPanel>
+                <TextBlock FontSize="24" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" Cursor="Hand">
+                    <Hyperlink x:Name="AppNameLink" NavigateUri="https://discord.gg/sfx7XxrNJu" Foreground="{DynamicResource AccentBrush}" TextDecorations="Underline" ToolTip="https://discord.gg/sfx7XxrNJu" RequestNavigate="AppNameLink_RequestNavigate">
+                        PC Monitor<Run x:Name="AppNameSuffixText" Text=" (Мониторинг ПК)" />
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock x:Name="AboutSummaryTitle" Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap" />
+                <TextBlock x:Name="AboutSummaryText" Margin="0,6,0,0" FontSize="14"
+                           Foreground="{DynamicResource TextDimBrush}" TextWrapping="Wrap" />
+                <TextBlock x:Name="VersionText" Margin="0,18,0,0" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap" />
+                <TextBlock x:Name="LastUpdatedText" Margin="0,8,0,0" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap" />
+                <TextBlock x:Name="StatusText" Margin="0,8,0,0" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap" />
+                <TextBlock x:Name="ParticipantsTitleText" Margin="0,8,0,0" Foreground="{DynamicResource TextBrush}" Text="Участники" />
+                <TextBlock x:Name="ParticipantDeveloperText" Margin="16,4,0,0" Foreground="{DynamicResource TextBrush}" Text="Deniscomm — Разработчик" />
+                <TextBlock x:Name="ParticipantProgrammerText" Margin="16,2,0,0" Foreground="{DynamicResource TextBrush}" Text="Manus AI — Программист" />
+                <TextBlock x:Name="ParticipantCoauthorText" Margin="16,2,0,0" Foreground="{DynamicResource TextBrush}" Text="DeepSeek AI — соавтор интерфейса" />
+                <TextBlock x:Name="ContactText" Margin="0,8,0,0" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap" />
+                <Button x:Name="DiscordLinkButton" Content="Discord: https://discord.gg/sfx7XxrNJu" Margin="0,8,0,0" Padding="10,4" HorizontalContentAlignment="Left" Foreground="{DynamicResource AccentBrush}" ToolTip="Открыть Discord" Click="DiscordLinkButton_Click" />
+                <TextBlock x:Name="DisclaimerText" Margin="0,12,0,0" Foreground="Gray" TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+    </ScrollViewer>
+</UserControl>

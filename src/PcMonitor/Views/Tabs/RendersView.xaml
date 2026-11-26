@@ -1,0 +1,145 @@
+<UserControl x:Class="PcMonitor.Views.RendersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Focusable="True" PreviewKeyDown="Navigation_PreviewKeyDown" PreviewKeyUp="Navigation_PreviewKeyUp">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="310" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="310" />
+        </Grid.ColumnDefinitions>
+        <Border Grid.Column="0" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1" CornerRadius="10" Padding="14" Margin="0,0,10,0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top">
+                    <TextBlock Text="Сцены и нагрузка" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="Вычисления начинаются только по кнопке. Нагрузка работает до остановки; уход с вкладки, скрытие или закрытие окна останавливают её."
+                               Foreground="{DynamicResource TextFaintBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,6,0,10" />
+                    <TextBlock Text="Разрешение и качество GPU" Foreground="{DynamicResource TextDimBrush}" FontSize="11" />
+                    <ComboBox x:Name="PresetBox" Margin="0,4,0,8" SelectedIndex="3">
+                        <ComboBoxItem Content="Low — 1280 × 720" Tag="Low" />
+                        <ComboBoxItem Content="Medium — 1920 × 1080" Tag="Medium" />
+                        <ComboBoxItem Content="High — 2560 × 1440" Tag="High" />
+                        <ComboBoxItem Content="Extreme — 3840 × 2160" Tag="Extreme" />
+                    </ComboBox>
+                    <TextBlock Text="Множитель вычислительной нагрузки (реальные повторные Draw)" Foreground="{DynamicResource TextDimBrush}" FontSize="11" />
+                    <ComboBox x:Name="WorkMultiplierBox" Margin="0,4,0,8" SelectedIndex="5"
+                              SelectionChanged="WorkMultiplier_SelectionChanged">
+                        <ComboBoxItem Content="1× — обычный рендер" Tag="1" />
+                        <ComboBoxItem Content="2× — повышенная нагрузка" Tag="2" />
+                        <ComboBoxItem Content="4× — высокая нагрузка" Tag="4" />
+                        <ComboBoxItem Content="8× — высокая нагрузка" Tag="8" />
+                        <ComboBoxItem Content="16× — высокая нагрузка" Tag="16" />
+                        <ComboBoxItem Content="32× — максимальная нагрузка" Tag="32" />
+                    </ComboBox>
+                    <TextBlock Text="Навигация сцены" Visibility="Collapsed" Foreground="{DynamicResource TextDimBrush}" FontWeight="SemiBold" Margin="0,4,0,0" />
+                    <CheckBox x:Name="AutoFlightCheck" Visibility="Collapsed" Content="Автопилот: полёт по сцене" IsChecked="True"
+                              Checked="AutoFlight_Changed" Unchecked="AutoFlight_Changed" Margin="0,3" />
+                    <TextBlock Text="Ручной режим: W/S — движение, A/D — боком, стрелки — поворот, Space/Ctrl — вверх/вниз" Visibility="Collapsed" Foreground="{DynamicResource TextFaintBrush}" FontSize="10" TextWrapping="Wrap" />
+                    <UniformGrid Columns="3" Visibility="Collapsed" Margin="0,5,0,7">
+                        <Button Content="Вверх" Tag="up" Click="NavigationButton_Click" Margin="0" />
+                        <Button Content="Вперёд" Tag="forward" Click="NavigationButton_Click" Margin="4,0,0,0" />
+                        <Button Content="Вниз" Tag="down" Click="NavigationButton_Click" Margin="4,0,0,0" />
+                        <Button Content="Влево" Tag="left" Click="NavigationButton_Click" Margin="0,4,0,0" />
+                        <Button Content="Назад" Tag="back" Click="NavigationButton_Click" Margin="4,4,0,0" />
+                        <Button Content="Вправо" Tag="right" Click="NavigationButton_Click" Margin="4,4,0,0" />
+                    </UniformGrid>
+                    <Button x:Name="ShowButton" Content="Предпросмотр GPU (до 10 кадров/с)" Click="Show_Click" Margin="0" />
+                    <Button x:Name="GpuLoadButton" Content="Начать нагрузку GPU · 32×" Click="GpuLoad_Click" Margin="0,6,0,0" />
+                    <Grid Margin="0,6,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" /><ColumnDefinition Width="6" /><ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" x:Name="StopButton" Content="Стоп / пауза" Click="Pause_Click" Margin="0" IsEnabled="False" />
+                        <Button Grid.Column="2" x:Name="RunAllButton" Content="Все сцены" Click="RunAll_Click" Margin="0" />
+                    </Grid>
+                    <ProgressBar x:Name="RunProgress" Height="4" Margin="0,8,0,0" Minimum="0" Maximum="1" />
+                    <TextBlock Text="CPU: трассировка лучей" FontWeight="SemiBold" Margin="0,12,0,4" />
+                    <Button x:Name="CpuPreviewButton" Content="Один кадр CPU (предпросмотр)" Click="CpuPreview_Click" Margin="0" />
+                    <Button x:Name="CpuLoadButton" Content="Начать CPU-нагрузку: все потоки" Click="CpuLoad_Click" Margin="0,6,0,0" />
+                    <TextBlock x:Name="ThermalText" Text="Автостоп: любой GPU ≥ 85 °C или CPU ≥ 95 °C. Без датчиков защита недоступна."
+                               Foreground="{DynamicResource TextDimBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,8,0,0" />
+                </StackPanel>
+                <ListBox x:Name="SceneList" Margin="0,10,0,0" SelectionChanged="Scene_SelectionChanged"
+                         Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,4">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding Description}" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource TextFaintBrush}" />
+                                <TextBlock Text="{Binding Speed}" FontSize="11" Foreground="{DynamicResource AccentBrush}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+        <Border Grid.Column="1" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1" CornerRadius="10" Padding="10" Margin="0,0,10,0">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                <Border Background="{DynamicResource PanelAltBg}" CornerRadius="8">
+                    <Grid>
+                        <Image x:Name="LiveImage" Stretch="Uniform" RenderOptions.BitmapScalingMode="LowQuality" />
+                        <Border HorizontalAlignment="Center" VerticalAlignment="Center" Background="{DynamicResource PanelAltBg}"
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                CornerRadius="8" Padding="22" MaxWidth="420" IsHitTestVisible="False">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source, ElementName=LiveImage}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <TextBlock Text="GPU · предпросмотр" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" />
+                                <TextBlock Text="Выберите сцену и нажмите «Предпросмотр GPU». Нагрузка не включается без вашего действия."
+                                           Margin="0,6,0,0" FontSize="12" Foreground="{DynamicResource TextDimBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                        <Border VerticalAlignment="Top" HorizontalAlignment="Left" Background="{DynamicResource PanelBg}" CornerRadius="6" Padding="10,6" Margin="12" MaxWidth="680">
+                            <StackPanel>
+                                <TextBlock x:Name="LiveTitle" Text="Выберите сцену и режим" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock x:Name="LiveStats" Text="Нагрузка остановлена" Foreground="{DynamicResource TextDimBrush}" FontSize="11" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+                <StackPanel Grid.Row="1" Margin="0,10,0,0">
+                    <TextBlock Text="CPU: реальная трассировка, 3 отражения" FontWeight="SemiBold" />
+                    <Border Background="{DynamicResource PanelAltBg}" CornerRadius="8" Height="170" Margin="0,6,0,0">
+                        <Image x:Name="CpuImage" Stretch="Uniform" />
+                    </Border>
+                    <TextBlock x:Name="CpuScoreText" Text="Предпросмотр не является полным бенчмарком" Foreground="{DynamicResource TextDimBrush}"
+                               FontSize="11" TextWrapping="Wrap" Margin="0,6,0,0" />
+                </StackPanel>
+            </Grid>
+        </Border>
+        <Border Grid.Column="2" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1" CornerRadius="10" Padding="14">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top">
+                    <TextBlock Text="Статистика и прогоны" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="Измеряются реальные GPU Draw без VSync и время по timestamp-запросам. Offscreen FPS — скорость готовых GPU-кадров, а не FPS экрана; живое превью отображается отдельным потоком."
+                               Foreground="{DynamicResource TextFaintBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,6,0,8" />
+                    <TextBlock Text="«Все сцены»: по 6 секунд после разогрева. Балл = FPS × 100, только для одинаковых сцен и пресетов. Артефакты в этом режиме не проверяются. WARP — программный CPU-рендер, не нагрузка GPU."
+                               Foreground="{DynamicResource TextFaintBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,10" />
+                </StackPanel>
+                <ListBox x:Name="ResultList" Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,4">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Detail}" FontSize="11" Foreground="{DynamicResource TextFaintBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>
+

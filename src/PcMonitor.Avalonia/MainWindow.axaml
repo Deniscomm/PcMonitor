@@ -1,0 +1,27 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="PcMonitor.Avalonia.MainWindow"
+        Width="1280" Height="800" MinWidth="900" MinHeight="600"
+        Title="PC Monitor">
+  <Grid ColumnDefinitions="210,*" RowDefinitions="52,*">
+    <Border Grid.ColumnSpan="2" Background="#1B222C" BorderBrush="#303C4C" BorderThickness="0,0,0,1">
+      <DockPanel Margin="18,0">
+        <TextBlock Text="PC Monitor" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+        <TextBlock x:Name="StatusText" Classes="muted" Text="Sensors: 0 · starting" VerticalAlignment="Center" HorizontalAlignment="Right" />
+      </DockPanel>
+    </Border>
+    <Border Grid.Row="1" Background="#161B22" BorderBrush="#303C4C" BorderThickness="0,0,1,0">
+      <StackPanel Margin="12,18">
+        <Button Classes="nav" Content="Dashboard" Click="DashboardClick" />
+        <Button Classes="nav" Content="Sensors" Click="SensorsClick" />
+        <Button Classes="nav" Content="System" Click="SystemClick" />
+        <Button Classes="nav" Content="Settings" Click="SettingsClick" />
+        <Border Height="1" Background="#303C4C" Margin="0,18,0,12" />
+        <TextBlock Classes="muted" Text="C# logic · Avalonia UI" FontSize="11" Margin="14,0" />
+      </StackPanel>
+    </Border>
+    <ScrollViewer Grid.Row="1" Grid.Column="1" HorizontalScrollBarVisibility="Disabled">
+      <ContentControl x:Name="PageHost" Margin="24" />
+    </ScrollViewer>
+  </Grid>
+</Window>

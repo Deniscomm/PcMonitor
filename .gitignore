@@ -1,0 +1,23 @@
+# Local tools, build outputs, caches, and user data
+.work/
+.nuget/packages/
+**/bin/
+**/obj/
+**/target/
+**/data/
+.vs/
+.idea/
+*.user
+*.suo
+*.tmp
+
+# Local diagnostics and temporary translation backups
+.work-missing-localization.txt
+*.before-menu-translation
+
+# Local desktop recording, not used by the application
+/src/PcMonitor/Assets/Desktop 2026.11.25 - 15.15.36.02.mp4
+
+# OS-generated files
+Thumbs.db
+.DS_Store

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>PcMonitor.Avalonia</AssemblyName>
+    <RootNamespace>PcMonitor.Avalonia</RootNamespace>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.9" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.9" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.9" />
+    <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.3" />
+    <ProjectReference Include="..\PcMonitor\PcMonitor.csproj" ReferenceOutputAssembly="true" />
+    <Content Include="..\..\src-rust\pcmonitor-core\target\release\pcmonitor-native.exe" Link="pcmonitor-native.exe" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
